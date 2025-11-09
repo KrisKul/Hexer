@@ -4,6 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 <title>Hexer: Pocket Contracts — Enhanced</title>
+
+<!-- PWA: manifest + iOS meta -->
+<link rel="manifest" href="/Hexer/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="/Hexer/icons/icon-180.png">
+
 <style>
   :root {
     --bg:#0b0f14; --bg2:#0e141b; --card:#0f1722; --muted:#a4b2c3; --line:#203040; --gold:#ffd76a; --ok:#9ef3ae; --bad:#ff7878;
@@ -111,93 +118,28 @@
   .questCard.locked{ opacity:.6; }
   .questGoal{ font-size:13px; background:#0f1b28; border:1px solid #213246; padding:6px 10px; border-radius:8px; margin-top:6px; }
 
-  /* NEW: Auto-battle toggle */
-  .toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
-  }
-  .toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #2a3a4e;
-    transition: .4s;
-    border-radius: 34px;
-    border: 1px solid #3a4a5e;
-  }
-  .toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-  }
-  input:checked + .toggle-slider {
-    background-color: var(--acc1);
-  }
-  input:checked + .toggle-slider:before {
-    transform: translateX(26px);
-  }
+  /* Auto-battle toggle */
+  .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2a3a4e; transition: .4s; border-radius: 34px; border: 1px solid #3a4a5e; }
+  .toggle-slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .toggle-slider { background-color: var(--acc1); }
+  input:checked + .toggle-slider:before { transform: translateX(26px); }
 
-  /* NEW: Bestiary styling */
-  .bestiary-entry {
-    background: linear-gradient(180deg, rgba(18,24,34,.85), rgba(10,14,20,.8));
-    border: 1px solid #26384d;
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 10px;
-  }
-  .bestiary-entry.discovered {
-    border-color: var(--ok);
-  }
-  .progress-text {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+  /* Bestiary styling */
+  .bestiary-entry { background: linear-gradient(180deg, rgba(18,24,34,.85), rgba(10,14,20,.8)); border: 1px solid #26384d; border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+  .bestiary-entry.discovered { border-color: var(--ok); }
+  .progress-text { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  /* NEW: Prestige glow */
-  .prestige-ready {
-    animation: prestigeGlow 2s ease-in-out infinite;
-  }
-  @keyframes prestigeGlow {
-    0%, 100% { box-shadow: 0 0 20px #ffd76a44; }
-    50% { box-shadow: 0 0 40px #ffd76a88; }
-  }
+  /* Prestige glow */
+  .prestige-ready { animation: prestigeGlow 2s ease-in-out infinite; }
+  @keyframes prestigeGlow { 0%, 100% { box-shadow: 0 0 20px #ffd76a44; } 50% { box-shadow: 0 0 40px #ffd76a88; } }
 
-  /* NEW: Stats styling */
-  .stat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #1a2532;
-  }
-  .stat-item:last-child {
-    border-bottom: none;
-  }
-  .stat-label {
-    color: var(--muted);
-    font-size: 13px;
-  }
-  .stat-value {
-    font-weight: 800;
-    color: var(--gold);
-  }
+  /* Stats styling */
+  .stat-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1a2532; }
+  .stat-item:last-child { border-bottom: none; }
+  .stat-label { color: var(--muted); font-size: 13px; }
+  .stat-value { font-weight: 800; color: var(--gold); }
 
   input[type="range"]{ width:100%; accent-color:#79aaff; }
 
@@ -207,6 +149,10 @@
 
   .modal-backdrop{ position:fixed; inset:0; background:#0009; display:none; align-items:flex-end; justify-content:center; z-index:40; }
   .modal{ width:100%; max-width:520px; margin:12px; background:linear-gradient(180deg,#0f1722,#0c121b); border:1px solid #24364a; border-radius:16px; padding:16px; box-shadow:0 20px 60px #000c; }
+
+  /* A2HS banner */
+  .a2hs{ position:fixed; z-index:45; left:12px; right:12px; bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 12px); background:linear-gradient(180deg,#0d1622,#0b1220); border:1px solid #25405a; border-radius:14px; padding:12px; box-shadow:0 12px 36px #000a; display:none; }
+  .a2hs .actions{ display:flex; gap:8px; margin-top:8px; }
 
   @media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important;} }
   @media (max-width:900px){
@@ -223,6 +169,16 @@
 
 <div class="modal-backdrop" id="resultModal" onclick="closeResult()">
   <div class="modal" id="resultModalInner" onclick="event.stopPropagation()"></div>
+</div>
+
+<!-- A2HS banner -->
+<div class="a2hs" id="a2hs">
+  <div style="font-weight:800; margin-bottom:6px">Install Hexer?</div>
+  <div class="muted" style="font-size:13px">Add to Home Screen for fullscreen play and offline caching.</div>
+  <div class="actions">
+    <button class="btn" onclick="dismissA2HS()">Not now</button>
+    <button class="btn" onclick="showA2HSHelp()">How to install</button>
+  </div>
 </div>
 
 <script>
@@ -252,9 +208,14 @@ function newGame(){
       completedQuests: {},
       flags: {}
     },
+    // Auto-battle
     autoBattle: false,
+    autoTarget: 'parts', // 'parts' | 'mutagen' | 'xp'
     bestiary: {},
-    settings: { autoBattleDelay: 2000 }
+    settings: { autoBattleDelay: 2000 },
+
+    // Trials (micro-roguelite)
+    trial: { active:false, timeLeft:0, fights:0, bonus:{}, history:[] }
   };
 }
 
@@ -282,6 +243,7 @@ const VIEWS=[
   { id:'hunts', name:'Hunts', ico:'🎯' },
   { id:'forge', name:'Forge', ico:'🔥' },
   { id:'mutate', name:'Mutations', ico:'🧬' },
+  { id:'trials', name:'Trials', ico:'⚡' },   // NEW: Trials tab
 ];
 const SECONDARY_VIEWS=[
   { id:'craft', name:'Craft', ico:'🧪' },
@@ -316,6 +278,7 @@ window.switchView=function(id){
     else if(id==='sets') viewSetsTab();
     else if(id==='bestiary') viewBestiary();
     else if(id==='stats') viewStats();
+    else if(id==='trials') viewTrials();
   }catch(err){ toast('Render error: '+err.message,'bad'); console.error(err); }
 };
 
@@ -454,7 +417,7 @@ DATA.quests = [
   { id: "tools_of_the_trade", chapter: "The Mire's Call", title: "Tools of the Trade", desc: "Forge something reliable.", levelReq: 1, goals: [{ type: "craft", item: "training_steel", count: 1 }], rewards: { gold: 70, parts: 2, xp: 120 }, unlock: { schematic: "training_steel" }, optional: false, next: null },
 ];
 
-/* ===================== AUTO-BATTLE SYSTEM ===================== */
+/* ===================== AUTO-BATTLE SYSTEM (TARGETED) ===================== */
 let autoBattleLoop = null;
 
 function startAutoBattle() {
@@ -479,8 +442,7 @@ function scheduleNextAutoBattle() {
   if(!G.autoBattle) return;
   autoBattleLoop = setTimeout(() => {
     if(!G.combat && G.autoBattle) {
-      const lvl = Math.max(1, Math.min(10, G.lvl));
-      const contract = generateContract(0, lvl, {modCount: 0});
+      const contract = pickAutoContract();
       if(contract) {
         G.currentContract = contract;
         enterCombat(contract.enemy);
@@ -489,14 +451,174 @@ function scheduleNextAutoBattle() {
   }, G.settings.autoBattleDelay);
 }
 
-window.toggleAutoBattle = function() {
-  if(G.autoBattle) {
-    stopAutoBattle();
-  } else {
-    startAutoBattle();
+function pickAutoContract(){
+  // Build a pool across tiers/levels near player level
+  const lvl = Math.max(1, Math.min(20, G.lvl));
+  const pool = [];
+  const tiers = [0,1,2];
+  for(const t of tiers){
+    for(const delta of [-1,0,1]){
+      const lv = Math.max(1, lvl+delta);
+      const c = generateContract(t, lv, {modCount: G.difficulty>0?1:0});
+      if(c) pool.push(c);
+    }
   }
+  if(!pool.length) return null;
+  if(G.autoTarget==='parts'){
+    pool.sort((a,b)=> (b.reward.parts - a.reward.parts) || (b.reward.gold-a.reward.gold));
+  }else if(G.autoTarget==='mutagen'){
+    pool.sort((a,b)=> (b.reward.mutagenChance - a.reward.mutagenChance) || (b.level - a.level));
+  }else{ // xp
+    pool.sort((a,b)=> (b.reward.xp - a.reward.xp) || (b.level - a.level));
+  }
+  return pool[0];
+}
+
+window.toggleAutoBattle = function() {
+  if(G.autoBattle) stopAutoBattle(); else startAutoBattle();
   if(ACTIVE === 'board') viewBoard();
 };
+window.setAutoTarget = function(target){
+  G.autoTarget = target;
+  saveGame();
+  toast('Auto target: '+target.toUpperCase());
+  if(ACTIVE==='board') viewBoard();
+};
+
+/* ===================== TRIALS (MICRO-ROGUELITE) ===================== */
+const TRIAL_DURATION_MS = 5*60*1000; // 5 minutes
+const TRIAL_BOONS = [
+  { id:'dmg20', name:'+20% Damage', apply:(b)=>{ b.dpsBoost=(b.dpsBoost||0)+.20; } },
+  { id:'crit10', name:'+10% Crit Chance', apply:(b)=>{ b.critChance=(b.critChance||0)+.10; } },
+  { id:'dot25', name:'+25% DoT Damage', apply:(b)=>{ b.dotDamageMult=(b.dotDamageMult||0)+.25; } },
+  { id:'statusStack', name:'+1 Status Stack', apply:(b)=>{ b.bleedStacksMax=Math.max( (b.bleedStacksMax||1), 2 ); } },
+  { id:'vigorOnKill', name:'+30 Vigor on Kill', apply:(b)=>{ b.vigorOnBleedingKill=true; } },
+  { id:'signCheap', name:'-50% Sign Cost', apply:(b)=>{ b.signCostMult=Math.min(.5, b.signCostMult||1); } },
+  { id:'quenStart', name:'Start fights with Quen 40', apply:(b)=>{ b.quenStart=40; } },
+  { id:'xp10', name:'+10% XP per win', apply:(b)=>{ b.trialXpBonus=(b.trialXpBonus||0)+.10; } },
+];
+
+let trialTimer = null;
+
+function viewTrials(){
+  let html = `<div class="section">`;
+  if(!G.trial.active){
+    html += `
+      <div class="card">
+        <div style="font-weight:800; font-size:18px; margin-bottom:6px">⚡ Trials — 5-minute runs</div>
+        <div class="muted" style="font-size:13px">Pick 1 of 3 boons after each win. Boons last only for the run. Fast fights, bus-ride friendly.</div>
+        <div class="divider"></div>
+        <button class="btn full" onclick="startTrial()">Start Trial</button>
+      </div>`;
+    if(G.trial.history?.length){
+      html += `<div class="divider"></div><div class="card"><div style="font-weight:800;margin-bottom:6px">Recent Runs</div>${G.trial.history.slice(-5).reverse().map(h=>`
+        <div class="row" style="justify-content:space-between"><span>${new Date(h.t).toLocaleTimeString()}</span><span class="badge">Wins ${h.w}</span><span class="badge">⭐ ${h.xp}</span></div>`).join('')}</div>`;
+    }
+  }else{
+    const time = Math.max(0, Math.ceil(G.trial.timeLeft/1000));
+    const mm = String(Math.floor(time/60)).padStart(2,'0');
+    const ss = String(time%60).padStart(2,'0');
+    html += `
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <div style="font-weight:800">Active Trial</div>
+          <div class="badge">⏱ ${mm}:${ss}</div>
+        </div>
+        <div class="muted" style="font-size:12px">Wins: ${G.trial.fights}</div>
+        <div class="divider"></div>
+        <div style="font-weight:700; margin-bottom:6px">Boons</div>
+        <div class="row" style="flex-wrap:wrap; gap:6px">
+          ${Object.keys(G.trial.bonus||{}).length?Object.keys(G.trial.bonus).map(k=>`<span class="pill">${k}</span>`).join(''):'<span class="muted" style="font-size:12px">None yet</span>'}
+        </div>
+        <div class="divider"></div>
+        <button class="btn full" onclick="endTrial()">End Run</button>
+      </div>`;
+  }
+  html += `</div>`;
+  $('#view').innerHTML = html;
+}
+
+function startTrial(){
+  if(G.trial.active) return;
+  G.trial = { active:true, timeLeft:TRIAL_DURATION_MS, fights:0, bonus:{}, history:G.trial.history||[] };
+  G._baseBonus = {...G.bonus};
+  refreshTrialBonuses();
+  saveGame();
+  toast('Trial started!','good');
+  // start timer
+  trialTimer = setInterval(()=>{
+    G.trial.timeLeft -= 1000;
+    if(G.trial.timeLeft <= 0){
+      clearInterval(trialTimer); trialTimer=null; finishTrial();
+    }
+    if(ACTIVE==='trials') viewTrials();
+  },1000);
+  // open first fight
+  const c = generateContract(0, Math.max(1, G.lvl), {modCount:0});
+  G.currentContract = c; enterCombat(c.enemy);
+}
+
+function refreshTrialBonuses(){
+  // Merge run boons into active bonus
+  G.bonus = { ...(G._baseBonus||{}), ...(G.trial?.bonus||{}) };
+}
+
+function offerTrialBoons(){
+  // Show modal with 3 random boons, pick 1
+  const picks = TRIAL_BOONS.slice().sort(()=>Math.random()-0.5).slice(0,3);
+  const inner = `
+    <div style="font-weight:800; margin-bottom:6px">Choose a Boon</div>
+    <div class="divider"></div>
+    <div class="grid2">
+      ${picks.map(b=>`<button class="btn" onclick="pickBoon('${b.id}')">${b.name}</button>`).join('')}
+    </div>`;
+  showResultModal('Trial Boon', inner, true);
+  // hijack Close button behavior so player must pick or close
+}
+
+window.pickBoon = function(id){
+  const boon = TRIAL_BOONS.find(b=>b.id===id); if(!boon) return closeResult();
+  // Apply into trial.bonus (as flags/aggregates) + record
+  const tmp = {...G.trial.bonus};
+  boon.apply(tmp);
+  // Store readable key for UI
+  tmp[boon.name] = (tmp[boon.name]||0) + 1;
+  G.trial.bonus = tmp;
+  refreshTrialBonuses();
+  saveGame();
+  toast('Boon chosen: '+boon.name,'good');
+  closeResult();
+  // queue next fight immediately if time remains
+  if(G.trial.timeLeft > 0){
+    const nl = Math.max(1, Math.min(20, G.lvl + Math.min(G.trial.fights, 5))); // ramps a bit
+    const c = generateContract(0, nl, {modCount: (G.trial.fights>=2)?1:0});
+    G.currentContract = c; enterCombat(c.enemy);
+  }
+};
+
+function endTrial(){
+  if(!G.trial.active) return;
+  clearInterval(trialTimer); trialTimer=null;
+  finishTrial();
+}
+
+function finishTrial(){
+  // Rewards scale with wins, with slight XP boost from boons
+  const wins = G.trial.fights;
+  const parts = Math.floor(wins*1.5)+2;
+  const gold = wins*20 + 50;
+  const xpBase = wins*40;
+  const xp = Math.round(xpBase * (1 + (G.trial.bonus.trialXpBonus||0)));
+  G.mats.part += parts; G.gold += gold; gainXP(xp);
+
+  G.trial.history = [...(G.trial.history||[]), { t:Date.now(), w:wins, xp }];
+  G.trial = { active:false, timeLeft:0, fights:0, bonus:{}, history:G.trial.history };
+  // restore bonuses
+  G.bonus = {...(G._baseBonus||{})}; delete G._baseBonus;
+  saveGame();
+  toast(`Trial complete — Wins ${wins}, ⭐ ${xp}`, 'good');
+  switchView('trials');
+}
 
 /* ===================== COMBAT CORE ===================== */
 let lastEnemyHp=null, lastPlayerHp=null, loop=null, stunTicks=0, confuseTicks=0, slowTicks=0, signBuffTicks=0;
@@ -677,6 +799,11 @@ function enterCombat(enemy){
   const wep = enemy.boss ? getEquippedWeapon('silver') : getEquippedWeapon('steel');
   if(wep) checkQuestProgress('useWeapon', { kind: wep.type });
 
+  // TRIAL: start with Quen if boon set
+  if(G.trial?.active && (G.bonus?.quenStart||0)>0){
+    G.bonus.quenShield = (G.bonus.quenShield||0) + (G.bonus.quenStart||0);
+  }
+
   // Update bestiary
   updateBestiary(enemy.id);
 
@@ -710,10 +837,14 @@ function handleEnemyDeath(bleedingKill=false){
   const enemyId=G.currentContract?.enemy?.id;
   G.mats.part += reward.parts; G.gold += reward.gold;
   const mut = Math.random()< (reward.mutagenChance||.02); if(mut) G.items.mutagen=(G.items.mutagen||0)+1;
-  const xp = reward.xp || Math.max(20, Math.round((G.currentContract?.level||1)*12));
+  let xp = reward.xp || Math.max(20, Math.round((G.currentContract?.level||1)*12));
+  // TRIAL xp boost
+  if(G.trial?.active && (G.trial.bonus?.trialXpBonus||0)>0){
+    xp = Math.round(xp*(1+G.trial.bonus.trialXpBonus));
+  }
   gainXP(xp);
 
-  if(bleedingKill && G.bonus?.vigorOnBleedingKill){ const add=Math.round(0.10*vigorMax()); G.vigor=Math.min(vigorMax(), G.vigor+add); }
+  if(bleedingKill && G.bonus?.vigorOnBleedingKill){ const add=Math.round(0.30*vigorMax()); G.vigor=Math.min(vigorMax(), G.vigor+add); }
 
   maybeDropTrophy(G.currentContract?.enemy||{});
 
@@ -738,6 +869,13 @@ function handleEnemyDeath(bleedingKill=false){
     checkQuestProgress('huntWin');
   }
 
+  // TRIAL: handle boon choice and chaining
+  if(G.trial?.active){
+    G.trial.fights++;
+    offerTrialBoons();
+    return;
+  }
+
   showResultModal('Victory', `<div class="row"><div class="badge">🔧 ${reward.parts}</div><div class="badge">💰 ${reward.gold}</div><div class="badge">🧪 ${mut?1:0}</div><div class="badge">⭐ ${xp} XP</div></div>`, true);
   
   // Auto-battle: schedule next fight
@@ -747,6 +885,9 @@ function handleEnemyDeath(bleedingKill=false){
 }
 function handlePlayerDeath(){
   clearInterval(loop); G.combat=null; saveGame();
+  if(G.trial?.active){
+    finishTrial(); return;
+  }
   showResultModal('Defeated', `<div class="muted">Patch up and try again. HP & Vigor reset next fight.</div>`, false);
   
   // Auto-battle: schedule next fight even after loss
@@ -1027,7 +1168,14 @@ function viewBoard(){
         </label>
       </div>
       <div class="muted" style="font-size:12px">Automatically hunt enemies while idle</div>
-      ${G.autoBattle ? `<div class="muted" style="font-size:11px; margin-top:4px">⚔️ Active - Fighting every ${G.settings.autoBattleDelay/1000}s</div>` : ''}
+      <div class="divider"></div>
+      <div class="row" style="gap:6px;flex-wrap:wrap">
+        <span class="pill">Target:</span>
+        <button class="btn" onclick="setAutoTarget('parts')" ${G.autoTarget==='parts'?'style="box-shadow:0 0 0 2px #2b8cff55"':''}>🔧 Parts</button>
+        <button class="btn" onclick="setAutoTarget('mutagen')" ${G.autoTarget==='mutagen'?'style="box-shadow:0 0 0 2px #2b8cff55"':''}>🧪 Mutagen</button>
+        <button class="btn" onclick="setAutoTarget('xp')" ${G.autoTarget==='xp'?'style="box-shadow:0 0 0 2px #2b8cff55"':''}>⭐ XP</button>
+      </div>
+      ${G.autoBattle ? `<div class="muted" style="font-size:11px; margin-top:4px">⚔️ Active — every ${G.settings.autoBattleDelay/1000}s</div>` : ''}
     </div>
 
     <div class="divider"></div>
@@ -1036,6 +1184,7 @@ function viewBoard(){
       <div style="font-weight:800;margin-bottom:6px">Utilities</div>
       <div class="grid2">
         ${secHtml}
+        <button class="btn" onclick="switchView('trials')">⚡ Trials</button>
       </div>
     </div>
 
@@ -1467,6 +1616,9 @@ function genBoss(){
     </div></div>`;
 }
 
+/* ===================== TRIALS VIEW HOOKS INTO RESULT ===================== */
+// Already handled inside handleEnemyDeath / finishTrial
+
 /* ===================== CRAFT ===================== */
 function viewCraft(){
   $('#view').innerHTML = `<div class="section">
@@ -1663,8 +1815,10 @@ function ensureQuestState(){
   G.gear = G.gear || { steel:null, silver:null, helmet:null, chest:null, gauntlets:null, trousers:null, boots:null, trophy:null };
   G.stats = G.stats || { totalKills:0, perfectStacks:0, totalDamageDealt:0, potionsUsed:0, signsCast:0, bossesKilled:0, criticalHits:0 };
   G.autoBattle = G.autoBattle || false;
+  G.autoTarget = G.autoTarget || 'parts';
   G.bestiary = G.bestiary || {};
   G.settings = G.settings || { autoBattleDelay: 2000 };
+  G.trial = G.trial || { active:false, timeLeft:0, fights:0, bonus:{}, history:[] };
 
   if(!G.quests || typeof G.quests !== 'object'){
     G.quests = {
@@ -1700,12 +1854,40 @@ if(G.autoBattle) {
   startAutoBattle();
 }
 
+/* ===================== PWA: register SW + A2HS nudges ===================== */
+(function(){
+  // Register service worker
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=> navigator.serviceWorker.register('/Hexer/sw.js'));
+  }
+
+  // Session counter to trigger banner on 3rd open
+  const key='hexer_sessions';
+  const count = Number(localStorage.getItem(key) || 0) + 1;
+  localStorage.setItem(key, String(count));
+
+  const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches
+                    || window.navigator.standalone === true;
+
+  if(!isStandalone && count >= 3){
+    // Show simple banner explaining Add to Home Screen for iOS
+    setTimeout(()=>{ const el=$('#a2hs'); if(el) el.style.display='block'; }, 1200);
+  }
+})();
+window.dismissA2HS = function(){ const el=$('#a2hs'); if(el) el.style.display='none'; };
+window.showA2HSHelp = function(){
+  alert('iPhone: tap Share → “Add to Home Screen”. Then open from the icon for fullscreen & offline.');
+  dismissA2HS();
+};
+
 /* Expose globals */
 window.acceptContract=acceptContract; window.rerollHunt=rerollHunt;
 window.explainCant=explainCant; window.craftSchematic=craftSchematic; window.equip=equip;
 window.castSign=castSign; window.useBomb=useBomb; window.useSwallow=useSwallow;
 window.genBoss=genBoss; window.closeResult=closeResult; window.enterCombat=enterCombat;
 window.confirmPrestige=confirmPrestige;
+window.viewTrials=viewTrials; window.startTrial=startTrial; window.endTrial=endTrial; window.pickBoon=pickBoon;
+
 </script>
 </body>
 </html>
